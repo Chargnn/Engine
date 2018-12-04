@@ -2,7 +2,11 @@ package com.chargnn;
 
 import com.chargnn.c.DisplayController;
 import com.chargnn.c.GameController;
+import com.chargnn.c.Keyboard;
+import com.chargnn.c.Mouse;
+import org.lwjgl.glfw.GLFWCursorPosCallback;
 import org.lwjgl.glfw.GLFWErrorCallback;
+import org.lwjgl.glfw.GLFWKeyCallback;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 
@@ -14,8 +18,11 @@ import static org.lwjgl.glfw.GLFW.*;
  */
 public class App
 {
-    DisplayController display = new DisplayController();
+    static DisplayController display = new DisplayController();
     GameController game = new GameController();
+    GLFWKeyCallback keyCallback;
+    GLFWCursorPosCallback mouseCallBack;
+
     public static void main( String[] args ) throws Exception {
         new App().init();
     }
@@ -32,7 +39,10 @@ public class App
         display.setCurrentContext();
         display.showWindow();
 
+        glfwSetKeyCallback(display.windowID, keyCallback = new Keyboard());
+        glfwSetCursorPosCallback(display.windowID, mouseCallBack = new Mouse());
         GL.createCapabilities();
+        glfwSwapInterval(1);
 
         game.init();
 
@@ -43,11 +53,12 @@ public class App
         long lastTime = System.nanoTime();
         long now;
         long timer = System.currentTimeMillis();
-        double delta = 0;
+        double delta;
         int frames = 0;
 
         GL11.glClearColor(0.2f, 0, 0, 0);
         GL11.glViewport(0, 0, display.windowWidth, display.windowHeight);
+        GL11.glEnable(GL11.GL_DEPTH_TEST);
 
         while(!display.shouldClose()){
             glfwPollEvents();
@@ -84,5 +95,13 @@ public class App
         glfwDestroyWindow(display.windowID);
         glfwTerminate();
         glfwSetErrorCallback(null).free();
+    }
+
+    public static int getDisplayWidth(){
+        return display.windowWidth;
+    }
+
+    public static int getDisplayHeight(){
+        return display.windowHeight;
     }
 }
